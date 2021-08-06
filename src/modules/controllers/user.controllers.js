@@ -26,3 +26,20 @@ module.exports.postUsers = async (req, res) => {
     }
   }
 };
+
+module.exports.getUser = async (req, res) => {
+  const { body } = req;
+  const user = await User.findOne({ login: body.login });
+  if (!user) {
+    res.send("Такого пользователя не существует");
+  } else {
+    let comparePassword = bcrypt.compareSync(body.password, user.password);
+    if (!comparePassword) {
+      res.send("Введенный пароль неверный");
+    } else {
+      const token = generateJwt(user._id, user.login);
+      // console.log(token);
+      return res.json({ token });
+    }
+  }
+};
