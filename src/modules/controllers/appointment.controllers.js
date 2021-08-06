@@ -8,6 +8,9 @@ module.exports.postAppointment = async (req, res) => {
   const { body } = req;
   const value = new Appointment(body);
   if (
+    value.hasOwnProperty("name") &&
+    value.hasOwnProperty("date") &&
+    value.hasOwnProperty("docName") &&
     value.name.length != 0 &&
     value.date.length != 0 &&
     value.docName.length != 0
