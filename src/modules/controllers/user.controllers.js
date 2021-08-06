@@ -1,52 +1,28 @@
 const User = require("../../DB/models/hospital/users");
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
 
-// module.exports.getSpend = async (req, res) => {
-//   Outlay.find().then((result) => res.send({ costs: result }));
-// };
+process.env.key = "Derevyanko_Olesya";
+const generateJwt = (_id, login) => {
+  return jwt.sign({ _id, login }, process.env.key, {
+    expiresIn: "24h",
+  });
+};
 
-// module.exports.postSpend = async (req, res) => {
-//   const { body } = req;
-//   const value = new Outlay(body);
-//   if (value.where && value.date && value.howMuch) {
-//     value
-//       .save()
-//       .then((result) => {
-//         Outlay.find().then((result) => res.send({ costs: result }));
-//       })
-//       .catch((err) => res.send(err));
-//   } else {
-//     res.send("User creation error, not all fields are filled");
-//   }
-// };
-
-// module.exports.patchSpend = async (req, res) => {
-//   const { body } = req;
-//   if (body._id) {
-//     if (body.where || body.date || body.howMuch) {
-//       Outlay.updateOne({ _id: body._id }, body)
-//         .then((result) => {
-//           Outlay.find().then((result) => res.send({ costs: result }));
-//         })
-//         .catch((err) => res.send(err));
-//     } else {
-//       res.send("Error changes, changed parameters were not transferred");
-//     }
-//   } else {
-//     res.send(
-//       "Error of change, the parameters of which record need to be changed is unknown"
-//     );
-//   }
-// };
-
-// module.exports.delSpend = async (req, res) => {
-//   const { query } = req;
-//   if(query.id){
-//     Outlay.deleteOne({ _id: query.id })
-//     .then((result) => {
-//       Outlay.find().then((result) => res.send({ costs: result }));
-//     })
-//     .catch((err) => res.send(err));
-//   } else {
-//     res.send('Delete error, it is not known which record to delete');
-//   }
-// };
+module.exports.postUsers = async (req, res) => {
+  const { login, password } = req.body;
+  if (!login || !password) {
+    res.status(420).send("Incorrect username or password");
+  } else {
+    const checkUser = await User.findOne({ login: login });
+    if (checkUser) {
+      res.status(420).send("User with this login already exists");
+    } else {
+      const hashPassword = await bcrypt.hash(password, 4);
+      const user = new User({ login: login, password: hashPassword });
+      user.save();
+      const token = generateJwt(user._id, user.login);
+      res.send({ token });
+    }
+  }
+};
