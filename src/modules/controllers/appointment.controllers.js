@@ -1,4 +1,4 @@
-const Outlay = require("../../DB/models/hospital/appointments");
+const Appointment = require("../../DB/models/hospital/appointments");
 
 // module.exports.getSpend = async (req, res) => {
 //   Outlay.find().then((result) => res.send({ costs: result }));

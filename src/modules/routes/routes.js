@@ -18,7 +18,7 @@ const {
   postUsers,
   patchUsers,
   delUsers,
-} = require("../controllers/user.controllers");
+} = require("../controllers/user.controllers.js");
 
 // router.get("/user/get", getUser);
 // router.post("/user/post", postUsers);
