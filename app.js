@@ -10,7 +10,7 @@ app.use(cors());
 app.use("/", apiRoutes);
 
 const url =
-  "mongodb+srv://user:user@cluster0.kh5p8.mongodb.net/To-Do?retryWrites=true&w=majority";
+  "mongodb+srv://user:user@clusterhospital.fv8zu.mongodb.net/Hospital?retryWrites=true&w=majority";
 mongoose.connect(url, { useNewUrlParser: true, useUnifiedTopology: true });
 
 app.listen(8080, () => {
