@@ -10,19 +10,19 @@ const generateJwt = (_id, login) => {
 };
 
 module.exports.postUsers = async (req, res) => {
-  const { body } = req;
-  if (!body.login || !body.password) {
-    res.send("Некорректный логин или пароль");
+  const { login, password } = req.body;
+  if (!login || !password) {
+    res.status(420).send("Incorrect username or password");
   } else {
-    const checkUser = await User.findOne({ login: body.login });
+    const checkUser = await User.findOne({ login: login });
     if (checkUser) {
-      res.send("Пользователь с таким логином уже существует");
+      res.status(420).send("User with this login already exists");
     } else {
-      const hashPassword = await bcrypt.hash(body.password, 4);
-      const user = new User({ login: body.login, password: hashPassword });
+      const hashPassword = await bcrypt.hash(password, 4);
+      const user = new User({ login: login, password: hashPassword });
       user.save();
       const token = generateJwt(user._id, user.login);
-      return res.json({ token });
+      res.send({ token });
     }
   }
 };
