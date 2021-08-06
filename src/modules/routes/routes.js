@@ -10,8 +10,8 @@ const {
 
 router.get("/appointment/get", getAppointment);
 router.post("/appointment/post", postAppointment);
-// router.patch("/appointment/patch", patchAppointment);
-// router.delete("/appointment/del", delAppointment);
+router.patch("/appointment/patch", patchAppointment);
+router.delete("/appointment/del", delAppointment);
 
 const {
   getUser,
