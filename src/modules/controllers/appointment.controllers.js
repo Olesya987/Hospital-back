@@ -7,7 +7,11 @@ module.exports.getAppointment = (req, res) => {
 module.exports.postAppointment = async (req, res) => {
   const { body } = req;
   const value = new Appointment(body);
-  if (value.name.length!=0 && value.date.length!=0 && value.docName.length!=0) {
+  if (
+    value.name.length != 0 &&
+    value.date.length != 0 &&
+    value.docName.length != 0
+  ) {
     value
       .save()
       .then((result) => {
@@ -40,13 +44,13 @@ module.exports.postAppointment = async (req, res) => {
 
 module.exports.delAppointment = async (req, res) => {
   const { query } = req;
-  if(query.id){
+  if (query.id) {
     Appointment.deleteOne({ _id: query.id })
-    .then((result) => {
-      Appointment.find().then((result) => res.send({ costs: result }));
-    })
-    .catch((err) => res.send(err));
+      .then((result) => {
+        Appointment.find().then((result) => res.send({ costs: result }));
+      })
+      .catch((err) => res.send(err));
   } else {
-    res.send('Delete error, it is not known which record to delete');
+    res.send("Delete error, it is not known which record to delete");
   }
 };
