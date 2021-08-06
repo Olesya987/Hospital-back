@@ -22,7 +22,7 @@ module.exports.postUsers = async (req, res) => {
       const user = new User({ login: login, password: hashPassword });
       user.save();
       const token = generateJwt(user._id, user.login);
-      res.send({ token });
+      res.send({ token, login });
     }
   }
 };
