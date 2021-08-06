@@ -1,7 +1,6 @@
 const Appointment = require("../../DB/models/hospital/appointments");
 
 module.exports.getAppointments = (req, res) => {
-  // const {body}=req;
   Appointment.find().then((result) => res.send({ appointments: result }));
 };
 
