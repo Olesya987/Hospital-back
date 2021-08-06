@@ -26,3 +26,19 @@ module.exports.postUsers = async (req, res) => {
     }
   }
 };
+
+module.exports.getUser = async (req, res) => {
+  const { login, password } = req.body;
+  const user = await User.findOne({ login: login });
+  if (!user) {
+    res.status(420).send("This user does not exist");
+  } else {
+    const comparePassword = bcrypt.compareSync(password, user.password);
+    if (!comparePassword) {
+      res.status(420).send("The entered password is incorrect");
+    } else {
+      const token = generateJwt(user._id, user.login);
+      res.send({ token, login });
+    }
+  }
+};
