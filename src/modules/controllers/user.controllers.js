@@ -10,36 +10,35 @@ const generateJwt = (_id, login) => {
 };
 
 module.exports.postUsers = async (req, res) => {
-  const { body } = req;
-  if (!body.login || !body.password) {
-    res.send("Некорректный логин или пароль");
+  const { login, password } = req.body;
+  if (!login || !password) {
+    res.status(420).send("Incorrect username or password");
   } else {
-    const checkUser = await User.findOne({ login: body.login });
+    const checkUser = await User.findOne({ login: login });
     if (checkUser) {
-      res.send("Пользователь с таким логином уже существует");
+      res.status(420).send("User with this login already exists");
     } else {
-      const hashPassword = await bcrypt.hash(body.password, 4);
-      const user = new User({ login: body.login, password: hashPassword });
+      const hashPassword = await bcrypt.hash(password, 4);
+      const user = new User({ login: login, password: hashPassword });
       user.save();
       const token = generateJwt(user._id, user.login);
-      return res.json({ token });
+      res.send({ token });
     }
   }
 };
 
 module.exports.getUser = async (req, res) => {
-  const { body } = req;
-  const user = await User.findOne({ login: body.login });
+  const { login, password } = req.body;
+  const user = await User.findOne({ login: login });
   if (!user) {
-    res.send("Такого пользователя не существует");
+    res.status(420).send("This user does not exist");
   } else {
-    let comparePassword = bcrypt.compareSync(body.password, user.password);
+    const comparePassword = bcrypt.compareSync(password, user.password);
     if (!comparePassword) {
-      res.send("Введенный пароль неверный");
+      res.status(420).send("The entered password is incorrect");
     } else {
       const token = generateJwt(user._id, user.login);
-      // console.log(token);
-      return res.json({ token });
+      res.send({ token, login });
     }
   }
 };
