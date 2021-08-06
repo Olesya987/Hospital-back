@@ -1,8 +1,8 @@
 const Appointment = require("../../DB/models/hospital/appointments");
 
-// module.exports.getSpend = async (req, res) => {
-//   Outlay.find().then((result) => res.send({ costs: result }));
-// };
+module.exports.getAppointments = (req, res) => {
+  Appointment.find().then((result) => res.send({ appointments: result }));
+};
 
 // module.exports.postSpend = async (req, res) => {
 //   const { body } = req;
