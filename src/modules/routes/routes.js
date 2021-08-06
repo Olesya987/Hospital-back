@@ -20,8 +20,8 @@ const {
   delUsers,
 } = require("../controllers/user.controllers.js");
 
-// router.get("/user/get", getUser);
-// router.post("/user/post", postUsers);
+router.get("/user/get", getUser);
+router.post("/user/post", postUsers);
 // router.patch("/user/patch", patchUsers);
 // router.delete("/user/del", delUsers);
 
