@@ -16,13 +16,13 @@ module.exports.postUsers = async (req, res) => {
   } else {
     const checkUser = await User.findOne({ login: login });
     if (checkUser) {
-      res.status(420).send("User with this login already exists");
+      res.status(421).send("User with this login already exists");
     } else {
       const hashPassword = await bcrypt.hash(password, 4);
       const user = new User({ login: login, password: hashPassword });
       user.save();
       const token = generateJwt(user._id, user.login);
-      res.send({ token, login });
+      res.send({user:{ token, login }});
     }
   }
 };
@@ -31,11 +31,11 @@ module.exports.getUser = async (req, res) => {
   const { login, password } = req.body;
   const user = await User.findOne({ login: login });
   if (!user) {
-    res.status(420).send("This user does not exist");
+    res.status(450).send("This user does not exist");
   } else {
     const comparePassword = bcrypt.compareSync(password, user.password);
     if (!comparePassword) {
-      res.status(420).send("The entered password is incorrect");
+      res.status(440).send("The entered password is incorrect");
     } else {
       const token = generateJwt(user._id, user.login);
       res.send({ token, login });
