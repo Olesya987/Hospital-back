@@ -59,3 +59,16 @@ module.exports.patchAppointment = async (req, res) => {
       );
   }
 };
+
+module.exports.delAppointment = async (req, res) => {
+  const { query } = req;
+  if (query.id) {
+    Appointment.deleteOne({ _id: query.id })
+      .then((result) => {
+        Appointment.find().then((result) => res.send({ costs: result }));
+      })
+      .catch((err) => res.send(err));
+  } else {
+    res.send("Delete error, it is not known which record to delete");
+  }
+};
