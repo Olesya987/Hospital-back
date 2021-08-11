@@ -22,22 +22,22 @@ module.exports.postUsers = async (req, res) => {
       const user = new User({ login: login, password: hashPassword });
       user.save();
       const token = generateJwt(user._id, user.login);
-      res.send({user:{ token, login }});
+      res.send({ token, login });
     }
   }
 };
 
 module.exports.getUser = async (req, res) => {
   const { login, password } = req.body;
-  const user = await User.findOne({ login: login });
-  if (!user) {
+  const checkUser = await User.findOne({ login: login });
+  if (!checkUser) {
     res.status(450).send("This user does not exist");
   } else {
-    const comparePassword = bcrypt.compareSync(password, user.password);
+    const comparePassword = bcrypt.compareSync(password, checkUser.password);
     if (!comparePassword) {
       res.status(440).send("The entered password is incorrect");
     } else {
-      const token = generateJwt(user._id, user.login);
+      const token = generateJwt(checkUser._id, checkUser.login);
       res.send({ token, login });
     }
   }

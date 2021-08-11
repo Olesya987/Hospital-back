@@ -1,26 +1,49 @@
 const Appointment = require("../../DB/models/hospital/appointments");
+const jwt = require("jsonwebtoken");
+
+process.env.key = "Derevyanko_Olesya";
+const parseJwt = (token) => {
+  return jwt.verify(token, process.env.key);
+};
 
 module.exports.getAppointment = (req, res) => {
-  Appointment.find().then((result) => res.send({ appointments: result }));
+  const { body } = req;
+  const tokenUser = parseJwt(req.headers.token);
+
+  Appointment.find({ userId: tokenUser._id }, [
+    "name",
+    "date",
+    "docName",
+    "complaints",
+  ]).then((result) => {
+    res.send({ appointments: result });
+  });
 };
 
 module.exports.postAppointment = async (req, res) => {
-  const { body } = req;
+  const { body, headers } = req;
+  const tokenUser = parseJwt(headers.token);
+  body["userId"] = tokenUser._id;
   const value = new Appointment(body);
+
   if (
-    value.hasOwnProperty("name") &&
-    value.hasOwnProperty("date") &&
-    value.hasOwnProperty("docName") &&
-    value.name.length != 0 &&
-    value.date.length != 0 &&
-    value.docName.length != 0
+    body.hasOwnProperty("name") &&
+    body.hasOwnProperty("date") &&
+    body.hasOwnProperty("docName") &&
+    body.hasOwnProperty("userId") &&
+    body.userId.length != 0 &&
+    body.name.length != 0 &&
+    body.date.length != 0 &&
+    body.docName.length != 0
   ) {
-    value
-      .save()
-      .then((result) => {
-        Appointment.find().then((result) => res.send({ appointments: result }));
-      })
-      .catch((err) => res.send(err));
+    value.save().then((result) => {
+      Appointment.find({ userId: tokenUser._id }, [
+        "name",
+        "date",
+        "docName",
+        "complaints",
+      ]).then((result) => res.send({ appointments: result }));
+    });
   } else {
     res
       .status(420)
@@ -30,20 +53,28 @@ module.exports.postAppointment = async (req, res) => {
 
 module.exports.patchAppointment = async (req, res) => {
   const { body } = req;
+
   if (body._id) {
     if (
       body.hasOwnProperty("name") &&
       body.hasOwnProperty("date") &&
       body.hasOwnProperty("docName") &&
+      req.headers.hasOwnProperty("token") &&
+      req.headers.token.length != 0 &&
       body.name.length != 0 &&
       body.date.length != 0 &&
       body.docName.length != 0
     ) {
+      const tokenUser = parseJwt(req.headers.token);
+
       Appointment.updateOne({ _id: body._id }, body)
         .then((result) => {
-          Appointment.find().then((result) =>
-            res.send({ appointments: result })
-          );
+          Appointment.find({ userId: tokenUser._id }, [
+            "name",
+            "date",
+            "docName",
+            "complaints",
+          ]).then((result) => res.send({ appointments: result }));
         })
         .catch((err) => res.send(err));
     } else {
@@ -61,11 +92,18 @@ module.exports.patchAppointment = async (req, res) => {
 };
 
 module.exports.delAppointment = async (req, res) => {
-  const { query } = req;
-  if (query.id) {
-    Appointment.deleteOne({ _id: query.id })
+  const { headers } = req;
+  const tokenUser = parseJwt(req.headers.token);
+
+  if (headers.id) {
+    Appointment.deleteOne({ _id: headers.id })
       .then((result) => {
-        Appointment.find().then((result) => res.send({ costs: result }));
+        Appointment.find({ userId: tokenUser._id }, [
+          "name",
+          "date",
+          "docName",
+          "complaints",
+        ]).then((result) => res.send({ costs: result }));
       })
       .catch((err) => res.send(err));
   } else {
