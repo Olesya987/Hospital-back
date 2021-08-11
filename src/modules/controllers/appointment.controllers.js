@@ -7,8 +7,7 @@ const parseJwt = (token) => {
 };
 
 module.exports.getAppointment = (req, res) => {
-  const { body } = req;
-  const tokenUser = parseJwt(req.headers.token);
+  const tokenUser = parseJwt(req.headers.authorization);
 
   Appointment.find({ userId: tokenUser._id }, [
     "name",
@@ -22,7 +21,7 @@ module.exports.getAppointment = (req, res) => {
 
 module.exports.postAppointment = async (req, res) => {
   const { body, headers } = req;
-  const tokenUser = parseJwt(headers.token);
+  const tokenUser = parseJwt(headers.authorization);
   body["userId"] = tokenUser._id;
   const value = new Appointment(body);
 
@@ -59,13 +58,13 @@ module.exports.patchAppointment = async (req, res) => {
       body.hasOwnProperty("name") &&
       body.hasOwnProperty("date") &&
       body.hasOwnProperty("docName") &&
-      req.headers.hasOwnProperty("token") &&
-      req.headers.token.length != 0 &&
+      req.headers.hasOwnProperty("authorization") &&
+      req.headers.authorization.length != 0 &&
       body.name.length != 0 &&
       body.date.length != 0 &&
       body.docName.length != 0
     ) {
-      const tokenUser = parseJwt(req.headers.token);
+      const tokenUser = parseJwt(req.headers.authorization);
 
       Appointment.updateOne({ _id: body._id }, body)
         .then((result) => {
@@ -92,20 +91,18 @@ module.exports.patchAppointment = async (req, res) => {
 };
 
 module.exports.delAppointment = async (req, res) => {
-  const { headers } = req;
-  const tokenUser = parseJwt(req.headers.token);
-
-  if (headers.id) {
-    Appointment.deleteOne({ _id: headers.id })
-      .then((result) => {
-        Appointment.find({ userId: tokenUser._id }, [
-          "name",
-          "date",
-          "docName",
-          "complaints",
-        ]).then((result) => res.send({ costs: result }));
-      })
-      .catch((err) => res.send(err));
+  const { query } = req;
+  const tokenUser = parseJwt(req.headers.authorization);
+  // console.log("query: ", query);
+  if (query.id) {
+    Appointment.deleteOne({ _id: query.id }).then((result) => {
+      Appointment.find({ userId: tokenUser._id }, [
+        "name",
+        "date",
+        "docName",
+        "complaints",
+      ]).then((result) => res.send({ appointments: result }));
+    });
   } else {
     res.send("Delete error, it is not known which record to delete");
   }
