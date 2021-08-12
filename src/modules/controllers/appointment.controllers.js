@@ -93,7 +93,6 @@ module.exports.patchAppointment = async (req, res) => {
 module.exports.delAppointment = async (req, res) => {
   const { query } = req;
   const tokenUser = parseJwt(req.headers.authorization);
-  // console.log("query: ", query);
   if (query.id) {
     Appointment.deleteOne({ _id: query.id }).then((result) => {
       Appointment.find({ userId: tokenUser._id }, [
