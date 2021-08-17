@@ -8,9 +8,10 @@ const parseJwt = (token) => {
 };
 
 module.exports.getPag = (req, res) => {
+  const { params } = req;
   const tokenUser = parseJwt(req.headers.authorization);
-  const pages = 6;
-  const currentPage = req.params.page || 1;
+  const pages = +params.pages || 5;
+  const currentPage = +params.page || 1;
 
   Appointment.find({ userId: tokenUser._id }, [
     "name",
@@ -23,9 +24,8 @@ module.exports.getPag = (req, res) => {
     .then((appointments) => {
       Appointment.count({ userId: tokenUser._id }).then((result) => {
         res.send({
+          allRows: result,
           appointments,
-          current: currentPage,
-          allPages: Math.ceil(result / pages),
         });
       });
     });
