@@ -2,13 +2,14 @@ const express = require("express");
 const router = express.Router();
 
 const {
-  getAppointment,
   postAppointment,
   patchAppointment,
   delAppointment,
+  getPag,
 } = require("../controllers/appointment.controllers.js");
 
-router.get("/appointment/get", getAppointment);
+// router.get("/appointment/get", getAppointment);
+router.get("/appointment/get/:currentPage/:rowsOnPage", getPag);
 router.post("/appointment/post", postAppointment);
 router.patch("/appointment/patch", patchAppointment);
 router.delete("/appointment/del", delAppointment);
@@ -22,7 +23,5 @@ const {
 
 router.post("/user/get", getUser);
 router.post("/user/post", postUsers);
-// router.patch("/user/patch", patchUsers);
-// router.delete("/user/del", delUsers);
 
 module.exports = router;
