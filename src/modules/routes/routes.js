@@ -2,7 +2,6 @@ const express = require("express");
 const router = express.Router();
 
 const {
-  getAppointment,
   postAppointment,
   patchAppointment,
   delAppointment,
@@ -10,7 +9,7 @@ const {
 } = require("../controllers/appointment.controllers.js");
 
 router.get("/appointment/get", getAppointment);
-router.get("/appointment/getp/:page", getPag);
+router.get("/appointment/get/:page", getPag);
 router.post("/appointment/post", postAppointment);
 router.patch("/appointment/patch", patchAppointment);
 router.delete("/appointment/del", delAppointment);

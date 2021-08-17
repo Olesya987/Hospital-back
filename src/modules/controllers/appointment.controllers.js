@@ -7,23 +7,10 @@ const parseJwt = (token) => {
   return jwt.verify(token, process.env.key);
 };
 
-module.exports.getAppointment = (req, res) => {
-  const tokenUser = parseJwt(req.headers.authorization);
-
-  Appointment.find({ userId: tokenUser._id }, [
-    "name",
-    "date",
-    "docName",
-    "complaints",
-  ]).then((result) => {
-    res.send({ appointments: result });
-  });
-};
-
 module.exports.getPag = (req, res) => {
   const tokenUser = parseJwt(req.headers.authorization);
   const pages = 6;
-  const currentPage = req.query.page || 1;
+  const currentPage = req.params.page || 1;
 
   Appointment.find({ userId: tokenUser._id }, [
     "name",
