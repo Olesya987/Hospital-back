@@ -1,5 +1,6 @@
 const Appointment = require("../../DB/models/hospital/appointments");
 const jwt = require("jsonwebtoken");
+const appointments = require("../../DB/models/hospital/appointments");
 
 process.env.key = "Derevyanko_Olesya";
 const parseJwt = (token) => {
@@ -17,6 +18,30 @@ module.exports.getAppointment = (req, res) => {
   ]).then((result) => {
     res.send({ appointments: result });
   });
+};
+
+module.exports.getPag = (req, res) => {
+  const tokenUser = parseJwt(req.headers.authorization);
+  const pages = 6;
+  const currentPage = req.query.page || 1;
+
+  Appointment.find({ userId: tokenUser._id }, [
+    "name",
+    "date",
+    "docName",
+    "complaints",
+  ])
+    .skip(pages * currentPage - pages)
+    .limit(pages)
+    .then((appointments) => {
+      Appointment.count({ userId: tokenUser._id }).then((result) => {
+        res.send({
+          appointments,
+          current: currentPage,
+          allPages: Math.ceil(result / pages),
+        });
+      });
+    });
 };
 
 module.exports.postAppointment = async (req, res) => {
