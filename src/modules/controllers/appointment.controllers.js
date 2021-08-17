@@ -31,6 +31,33 @@ module.exports.getPag = (req, res) => {
     });
 };
 
+module.exports.sortAppointment = (req, res) => {
+  const { params, body } = req;
+  const tokenUser = parseJwt(req.headers.authorization);
+  const rowsOnPage = +params.rowsOnPage || 5;
+  const currentPage = +params.currentPage || 1;
+  const value = body.value;
+  const direction = +body.direction;
+
+  Appointment.find({ userId: tokenUser._id }, [
+    "name",
+    "date",
+    "docName",
+    "complaints",
+  ])
+    .sort({ [value]: direction })
+    .skip(rowsOnPage * currentPage - rowsOnPage)
+    .limit(rowsOnPage)
+    .then((appointments) => {
+      Appointment.count({ userId: tokenUser._id }).then((result) => {
+        res.send({
+          allRows: result,
+          appointments,
+        });
+      });
+    });
+};
+
 module.exports.postAppointment = async (req, res) => {
   const { body, headers } = req;
   const tokenUser = parseJwt(headers.authorization);
