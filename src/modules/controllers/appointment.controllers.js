@@ -10,8 +10,8 @@ const parseJwt = (token) => {
 module.exports.getPag = (req, res) => {
   const { params } = req;
   const tokenUser = parseJwt(req.headers.authorization);
-  const pages = +params.pages || 5;
-  const currentPage = +params.page || 1;
+  const rowsOnPage = +params.rowsOnPage || 5;
+  const currentPage = +params.currentPage || 1;
 
   Appointment.find({ userId: tokenUser._id }, [
     "name",
@@ -19,8 +19,8 @@ module.exports.getPag = (req, res) => {
     "docName",
     "complaints",
   ])
-    .skip(pages * currentPage - pages)
-    .limit(pages)
+    .skip(rowsOnPage * currentPage - rowsOnPage)
+    .limit(rowsOnPage)
     .then((appointments) => {
       Appointment.count({ userId: tokenUser._id }).then((result) => {
         res.send({
