@@ -30,10 +30,12 @@ module.exports.postAppointment = async (req, res) => {
     body.hasOwnProperty("date") &&
     body.hasOwnProperty("docName") &&
     body.hasOwnProperty("userId") &&
-    body.userId.length != 0 &&
-    body.name.length != 0 &&
-    body.date.length != 0 &&
-    body.docName.length != 0
+    body.hasOwnProperty("complaints") &&
+    body.userId.length !== 0 &&
+    body.name.length !== 0 &&
+    body.date.length !== 0 &&
+    body.docName.length !== 0 &&
+    body.complaints.length !== 0
   ) {
     value.save().then((result) => {
       Appointment.find({ userId: tokenUser._id }, [
@@ -58,11 +60,13 @@ module.exports.patchAppointment = async (req, res) => {
       body.hasOwnProperty("name") &&
       body.hasOwnProperty("date") &&
       body.hasOwnProperty("docName") &&
+      body.hasOwnProperty("complaints") &&
       req.headers.hasOwnProperty("authorization") &&
-      req.headers.authorization.length != 0 &&
-      body.name.length != 0 &&
-      body.date.length != 0 &&
-      body.docName.length != 0
+      req.headers.authorization.length !== 0 &&
+      body.name.length !== 0 &&
+      body.date.length !== 0 &&
+      body.docName.length !== 0 &&
+      body.complaints.length !== 0
     ) {
       const tokenUser = parseJwt(req.headers.authorization);
 
@@ -83,7 +87,7 @@ module.exports.patchAppointment = async (req, res) => {
     }
   } else {
     res
-      .status(420)
+      .status(425)
       .send(
         "Error of change, the parameters of which record need to be changed is unknown"
       );
