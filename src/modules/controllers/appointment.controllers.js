@@ -8,25 +8,22 @@ const parseJwt = (token) => {
 };
 
 module.exports.getPag = (req, res) => {
-  const { params, body } = req;
+  // const { params } = req;
+  const { body } = req;
   const tokenUser = parseJwt(req.headers.authorization);
-  const rowsOnPage = +params.rowsOnPage || 5;
-  const currentPage = +params.currentPage || 1;
-
+  const rowsOnPage = +body.rowsOnPage || 5;
+  const currentPage = +body.currentPage || 1;
   if (
     body.hasOwnProperty("value") &&
     body.hasOwnProperty("direction") &&
     body.hasOwnProperty("before") &&
     body.hasOwnProperty("after") &&
-    body.value.length !== 0 &&
-    body.direction.length !== 0 &&
-    body.before.length !== 0 &&
-    body.after.length !== 0
+    body.value &&
+    body.direction &&
+    body.before &&
+    body.after
   ) {
-    const value = body.value;
-    const direction = body.direction;
-    const before = body.before;
-    const after = body.after;
+    const { value, direction, before, after } = body;
 
     Appointment.find(
       { userId: tokenUser._id, date: { $gte: before, $lte: after } },
@@ -49,11 +46,10 @@ module.exports.getPag = (req, res) => {
   } else if (
     body.hasOwnProperty("value") &&
     body.hasOwnProperty("direction") &&
-    body.value.length !== 0 &&
-    body.direction.length !== 0
+    body.value &&
+    body.direction
   ) {
-    const value = body.value;
-    const direction = body.direction;
+    const { value, direction } = body;
 
     Appointment.find({ userId: tokenUser._id }, [
       "name",
@@ -75,11 +71,10 @@ module.exports.getPag = (req, res) => {
   } else if (
     body.hasOwnProperty("before") &&
     body.hasOwnProperty("after") &&
-    body.before.length !== 0 &&
-    body.after.length !== 0
+    body.before &&
+    body.after
   ) {
-    const before = body.before;
-    const after = body.after;
+    const { before, after } = body;
 
     Appointment.find(
       { userId: tokenUser._id, date: { $gte: before, $lte: after } },

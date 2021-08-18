@@ -8,7 +8,7 @@ const {
   getPag,
 } = require("../controllers/appointment.controllers.js");
 
-router.post("/appointment/get/:currentPage/:rowsOnPage", getPag);
+router.post("/appointment/get", getPag);
 router.post("/appointment/post", postAppointment);
 router.patch("/appointment/patch", patchAppointment);
 router.delete("/appointment/del", delAppointment);
