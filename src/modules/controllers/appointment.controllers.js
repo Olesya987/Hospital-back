@@ -8,54 +8,114 @@ const parseJwt = (token) => {
 };
 
 module.exports.getPag = (req, res) => {
-  const { params } = req;
-  const tokenUser = parseJwt(req.headers.authorization);
-  const rowsOnPage = +params.rowsOnPage || 5;
-  const currentPage = +params.currentPage || 1;
-
-  Appointment.find({ userId: tokenUser._id }, [
-    "name",
-    "date",
-    "docName",
-    "complaints",
-  ])
-    .skip(rowsOnPage * currentPage - rowsOnPage)
-    .limit(rowsOnPage)
-    .then((appointments) => {
-      Appointment.count({ userId: tokenUser._id }).then((result) => {
-        res.send({
-          allRows: result,
-          appointments,
-        });
-      });
-    });
-};
-
-module.exports.sortAppointment = (req, res) => {
   const { params, body } = req;
   const tokenUser = parseJwt(req.headers.authorization);
   const rowsOnPage = +params.rowsOnPage || 5;
   const currentPage = +params.currentPage || 1;
-  const value = body.value;
-  const direction = +body.direction;
 
-  Appointment.find({ userId: tokenUser._id }, [
-    "name",
-    "date",
-    "docName",
-    "complaints",
-  ])
-    .sort({ [value]: direction })
-    .skip(rowsOnPage * currentPage - rowsOnPage)
-    .limit(rowsOnPage)
-    .then((appointments) => {
-      Appointment.count({ userId: tokenUser._id }).then((result) => {
-        res.send({
-          allRows: result,
-          appointments,
+  if (
+    body.hasOwnProperty("value") &&
+    body.hasOwnProperty("direction") &&
+    body.hasOwnProperty("before") &&
+    body.hasOwnProperty("after") &&
+    body.value.length !== 0 &&
+    body.direction.length !== 0 &&
+    body.before.length !== 0 &&
+    body.after.length !== 0
+  ) {
+    const value = body.value;
+    const direction = body.direction;
+    const before = body.before;
+    const after = body.after;
+
+    Appointment.find(
+      { userId: tokenUser._id, date: { $gte: before, $lte: after } },
+      ["name", "date", "docName", "complaints"]
+    )
+      .sort({ [value]: direction === "asc" ? 1 : -1 })
+      .skip(rowsOnPage * currentPage - rowsOnPage)
+      .limit(rowsOnPage)
+      .then((appointments) => {
+        Appointment.count({
+          userId: tokenUser._id,
+          date: { $gte: before, $lte: after },
+        }).then((result) => {
+          res.send({
+            allRows: result,
+            appointments,
+          });
         });
       });
-    });
+  } else if (
+    body.hasOwnProperty("value") &&
+    body.hasOwnProperty("direction") &&
+    body.value.length !== 0 &&
+    body.direction.length !== 0
+  ) {
+    const value = body.value;
+    const direction = body.direction;
+
+    Appointment.find({ userId: tokenUser._id }, [
+      "name",
+      "date",
+      "docName",
+      "complaints",
+    ])
+      .sort({ [value]: direction === "asc" ? 1 : -1 })
+      .skip(rowsOnPage * currentPage - rowsOnPage)
+      .limit(rowsOnPage)
+      .then((appointments) => {
+        Appointment.count({ userId: tokenUser._id }).then((result) => {
+          res.send({
+            allRows: result,
+            appointments,
+          });
+        });
+      });
+  } else if (
+    body.hasOwnProperty("before") &&
+    body.hasOwnProperty("after") &&
+    body.before.length !== 0 &&
+    body.after.length !== 0
+  ) {
+    const before = body.before;
+    const after = body.after;
+
+    Appointment.find(
+      { userId: tokenUser._id, date: { $gte: before, $lte: after } },
+      ["name", "date", "docName", "complaints"]
+    )
+      .skip(rowsOnPage * currentPage - rowsOnPage)
+      .limit(rowsOnPage)
+      .then((appointments) => {
+        Appointment.count({
+          userId: tokenUser._id,
+          date: { $gte: before, $lte: after },
+        }).then((result) => {
+          res.send({
+            allRows: result,
+            appointments,
+          });
+        });
+      });
+  } else {
+    Appointment.find({ userId: tokenUser._id }, [
+      "name",
+      "date",
+      "docName",
+      "complaints",
+    ])
+      .skip(rowsOnPage * currentPage - rowsOnPage)
+      .limit(rowsOnPage)
+      .then((appointments) => {
+        Appointment.count({ userId: tokenUser._id }).then((result) => {
+          res.send({
+            allRows: result,
+            appointments,
+          });
+        });
+      });
+  }
 };
 
 module.exports.postAppointment = async (req, res) => {
