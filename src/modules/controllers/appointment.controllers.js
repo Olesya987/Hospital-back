@@ -8,27 +8,109 @@ const parseJwt = (token) => {
 };
 
 module.exports.getPag = (req, res) => {
-  const { params } = req;
+  // const { params } = req;
+  const { body } = req;
   const tokenUser = parseJwt(req.headers.authorization);
-  const rowsOnPage = +params.rowsOnPage || 5;
-  const currentPage = +params.currentPage || 1;
+  const rowsOnPage = +body.rowsOnPage || 5;
+  const currentPage = +body.currentPage || 1;
+  if (
+    body.hasOwnProperty("value") &&
+    body.hasOwnProperty("direction") &&
+    body.hasOwnProperty("before") &&
+    body.hasOwnProperty("after") &&
+    body.value &&
+    body.direction &&
+    body.before &&
+    body.after
+  ) {
+    const { value, direction, before, after } = body;
 
-  Appointment.find({ userId: tokenUser._id }, [
-    "name",
-    "date",
-    "docName",
-    "complaints",
-  ])
-    .skip(rowsOnPage * currentPage - rowsOnPage)
-    .limit(rowsOnPage)
-    .then((appointments) => {
-      Appointment.count({ userId: tokenUser._id }).then((result) => {
-        res.send({
-          allRows: result,
-          appointments,
+    Appointment.find(
+      { userId: tokenUser._id, date: { $gte: before, $lte: after } },
+      ["name", "date", "docName", "complaints"]
+    )
+      .sort({ [value]: direction === "asc" ? 1 : -1 })
+      .skip(rowsOnPage * currentPage - rowsOnPage)
+      .limit(rowsOnPage)
+      .then((appointments) => {
+        Appointment.count({
+          userId: tokenUser._id,
+          date: { $gte: before, $lte: after },
+        }).then((result) => {
+          res.send({
+            allRows: result,
+            appointments,
+          });
         });
       });
-    });
+  } else if (
+    body.hasOwnProperty("value") &&
+    body.hasOwnProperty("direction") &&
+    body.value &&
+    body.direction
+  ) {
+    const { value, direction } = body;
+
+    Appointment.find({ userId: tokenUser._id }, [
+      "name",
+      "date",
+      "docName",
+      "complaints",
+    ])
+      .sort({ [value]: direction === "asc" ? 1 : -1 })
+      .skip(rowsOnPage * currentPage - rowsOnPage)
+      .limit(rowsOnPage)
+      .then((appointments) => {
+        Appointment.count({ userId: tokenUser._id }).then((result) => {
+          res.send({
+            allRows: result,
+            appointments,
+          });
+        });
+      });
+  } else if (
+    body.hasOwnProperty("before") &&
+    body.hasOwnProperty("after") &&
+    body.before &&
+    body.after
+  ) {
+    const { before, after } = body;
+
+    Appointment.find(
+      { userId: tokenUser._id, date: { $gte: before, $lte: after } },
+      ["name", "date", "docName", "complaints"]
+    )
+      .skip(rowsOnPage * currentPage - rowsOnPage)
+      .limit(rowsOnPage)
+      .then((appointments) => {
+        Appointment.count({
+          userId: tokenUser._id,
+          date: { $gte: before, $lte: after },
+        }).then((result) => {
+          res.send({
+            allRows: result,
+            appointments,
+          });
+        });
+      });
+  } else {
+    Appointment.find({ userId: tokenUser._id }, [
+      "name",
+      "date",
+      "docName",
+      "complaints",
+    ])
+      .skip(rowsOnPage * currentPage - rowsOnPage)
+      .limit(rowsOnPage)
+      .then((appointments) => {
+        Appointment.count({ userId: tokenUser._id }).then((result) => {
+          res.send({
+            allRows: result,
+            appointments,
+          });
+        });
+      });
+  }
 };
 
 module.exports.postAppointment = async (req, res) => {
