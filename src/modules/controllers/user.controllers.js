@@ -24,17 +24,17 @@ module.exports.postUsers = async (req, res) => {
       res.status(421).send("User with this login already exists");
     } else {
       const hashPassword = await bcrypt.hash(password, 4);
-      const user = new User({ login: login, password: hashPassword });
+      const user = new User({ login: login, password: hashPassword, img: "" });
       user.save();
       const token = generateJwt(user._id, user.login);
-      res.send({ token, login });
+      res.send({ token, login, img });
     }
   }
 };
 
 module.exports.getUser = async (req, res) => {
   const { login, password } = req.body;
-  const checkUser = await User.findOne({ login: login });
+  const checkUser = await User.findOne({ login });
   if (!checkUser) {
     res.status(450).send("This user does not exist");
   } else {
@@ -42,21 +42,10 @@ module.exports.getUser = async (req, res) => {
     if (!comparePassword) {
       res.status(440).send("The entered password is incorrect");
     } else {
-      const token = generateJwt(checkUser._id, checkUser.login);
-      res.send({ token, login });
+      const { _id, login, img } = checkUser;
+      const token = generateJwt(_id, login);
+      res.send({ token, login, img });
     }
-  }
-};
-
-module.exports.getUserToLC = async (req, res) => {
-  const { headers } = req;
-  if (headers.hasOwnProperty("authorization") && headers.authorization) {
-    const { _id } = parseJwt(headers.authorization);
-    User.find({ _id }).then((result) => {
-      res.send(result[0].img ? result[0].img : "");
-    });
-  } else {
-    res.status(411).send("User not found");
   }
 };
 
