@@ -53,10 +53,7 @@ module.exports.getUserToLC = async (req, res) => {
   if (headers.hasOwnProperty("authorization") && headers.authorization) {
     const { _id } = parseJwt(headers.authorization);
     User.find({ _id }).then((result) => {
-      console.log(result);
-      if (result[0].img) {
-        res.send(result[0].img);
-      } else res.send("");
+      res.send(result[0].img ? result[0].img : "");
     });
   } else {
     res.status(411).send("User not found");
