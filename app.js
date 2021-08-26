@@ -3,10 +3,13 @@ const cors = require("cors");
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 const apiRoutes = require("./src/modules/routes/routes");
+const fileUpload = require("express-fileupload");
 const app = express();
 
 app.use(express.json());
 app.use(cors());
+app.use(fileUpload());
+app.use(express.static(__dirname + "/src/source/images"));
 app.use("/", apiRoutes);
 
 const url =
