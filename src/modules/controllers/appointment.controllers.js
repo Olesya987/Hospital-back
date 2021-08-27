@@ -8,7 +8,22 @@ const parseJwt = (token) => {
 };
 
 module.exports.getPag = (req, res) => {
-  // const { params } = req;
+  // #swagger.tags = ['Appointment']
+  // #swagger.description = 'вывод записей пользователя'
+
+  /* #swagger.parameters['authorization'] = {
+        in: 'header',
+        description: 'token',
+        required: true,
+        type: 'string',
+      } */
+  /* #swagger.parameters['GetAppointments'] = {
+        in: 'body',
+        description: 'all appointments',
+        required: true,
+        type: 'object',
+        schema: { $ref: "#/definitions/GetAppointments" }
+      } */
   const { body } = req;
   const tokenUser = parseJwt(req.headers.authorization);
   const rowsOnPage = +body.rowsOnPage || 5;
@@ -114,6 +129,22 @@ module.exports.getPag = (req, res) => {
 };
 
 module.exports.postAppointment = async (req, res) => {
+  // #swagger.tags = ['Appointment']
+  // #swagger.description = 'вывод записей пользователя'
+
+  /* #swagger.parameters['authorization'] = {
+        in: 'header',
+        description: 'token',
+        required: true,
+        type: 'string',
+      } */
+  /* #swagger.parameters['Appointment'] = {
+        in: 'body',
+        description: 'new appointment',
+        required: true,
+        type: 'object',
+        schema: { $ref: "#/definitions/Appointment" }
+      } */
   const { body, headers } = req;
   const tokenUser = parseJwt(headers.authorization);
   body["userId"] = tokenUser._id;
@@ -140,6 +171,9 @@ module.exports.postAppointment = async (req, res) => {
       ]).then((result) => res.send({ appointments: result }));
     });
   } else {
+    /* #swagger.responses[420] = { 
+          description: 'Appointment creation error, not all fields are filled' 
+        } */
     res
       .status(420)
       .send("Appointment creation error, not all fields are filled");
@@ -147,6 +181,16 @@ module.exports.postAppointment = async (req, res) => {
 };
 
 module.exports.patchAppointment = async (req, res) => {
+  // #swagger.tags = ['Appointment']
+  // #swagger.description = 'вывод записей пользователя'
+
+  /* #swagger.parameters['AppointmentPatch'] = {
+        in: 'body',
+        description: 'new appointment',
+        required: true,
+        type: 'object',
+        schema: { $ref: "#/definitions/AppointmentPatch" }
+      } */
   const { body } = req;
 
   if (body._id) {
@@ -162,24 +206,21 @@ module.exports.patchAppointment = async (req, res) => {
       body.docName.length !== 0 &&
       body.complaints.length !== 0
     ) {
-      const tokenUser = parseJwt(req.headers.authorization);
-
       Appointment.updateOne({ _id: body._id }, body)
-        .then((result) => {
-          Appointment.find({ userId: tokenUser._id }, [
-            "name",
-            "date",
-            "docName",
-            "complaints",
-          ]).then((result) => res.send({ appointments: result }));
-        })
+        .then((result) => res.send("OK"))
         .catch((err) => res.send(err));
     } else {
+      /* #swagger.responses[420] = { 
+          description: 'Error changes, changed parameters were not transferred' 
+        } */
       res
         .status(420)
         .send("Error changes, changed parameters were not transferred");
     }
   } else {
+    /* #swagger.responses[425] = { 
+          description: 'Error of change, the parameters of which record need to be changed is unknown' 
+        } */
     res
       .status(425)
       .send(
@@ -189,18 +230,24 @@ module.exports.patchAppointment = async (req, res) => {
 };
 
 module.exports.delAppointment = async (req, res) => {
+  // #swagger.tags = ['Appointment']
+  // #swagger.description = 'вывод записей пользователя'
+
+  /* #swagger.parameters['query'] = {
+        in: 'query',
+        description: 'id',
+        required: true,
+        type: 'string',
+      } */
   const { query } = req;
-  const tokenUser = parseJwt(req.headers.authorization);
   if (query.id) {
-    Appointment.deleteOne({ _id: query.id }).then((result) => {
-      Appointment.find({ userId: tokenUser._id }, [
-        "name",
-        "date",
-        "docName",
-        "complaints",
-      ]).then((result) => res.send({ appointments: result }));
-    });
+    Appointment.deleteOne({ _id: query.id }).then((result) => res.send("OK"));
   } else {
-    res.send("Delete error, it is not known which record to delete");
+    /* #swagger.responses[441] = { 
+          description: 'Delete error, it is not known which record to delete' 
+        } */
+    res
+      .status(441)
+      .send("Delete error, it is not known which record to delete");
   }
 };
